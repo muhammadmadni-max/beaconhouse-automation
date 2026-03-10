@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Exit immediately if a command fails
+set -e
+
+# Activate virtual environment
+source /home/datanext/automation/venv/bin/activate
+
+# Set Chrome environment
+export HOME=/home/datanext
+export DISPLAY=:0
+
+cd /home/datanext/automation
+
+# Run FastAPI app with reload
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload

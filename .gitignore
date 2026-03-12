@@ -3,6 +3,9 @@ venv
 .venv
 /venv
 ./chrome_profile
-chrome_profile
-/chrome_profile
 .chrome_profile
+/chrome_profile
+
+.idea
+chrome_profile
+input

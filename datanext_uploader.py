@@ -1,5 +1,4 @@
 import os
-import time
 from time import sleep
 from random import randint
 from selenium import webdriver
@@ -8,14 +7,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
 
 class DataNextUploader:
-    """
-    Automates file upload and form submission on DataNext platform.
-    """
-
     def __init__(self, chrome_profile_path: str = './chrome_profile', wait_timeout: int = 15):
         self.driver = None
         self.wait = None
@@ -40,6 +36,7 @@ class DataNextUploader:
         options.add_argument(f"--user-data-dir={self.chrome_profile_path}")
         self.driver = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.driver, self.wait_timeout)
+        sleep(randint(a=1, b=3))
 
     def navigate_to_site(self, url: str = 'http://beaconhouse.datanext.co/') -> None:
         self.driver.get(url=url)
@@ -48,18 +45,31 @@ class DataNextUploader:
         sleep(randint(a=1, b=3))
 
     def wait_for_login(self):
-        if self.is_element_available(locator='//input[@placeholder="Position"]'):
+        if self.is_element_available(locator='//input[@placeholder="Position"]', timeout=15):
             input('Please login and then press enter in terminal>>>>>>>')
         else:
             print('Already logged in')
 
-        sleep(randint(a=2, b=5))
+        sleep(randint(a=1, b=3))
+
+    def click_if_body_hidden(self):
+        if self.is_element_available(locator='body[style="overflow: hidden;"]', timeout=5):
+            element = self.driver.find_element("css selector", "button")  # replace with your element
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element).click().perform()
 
     def click_class_text(self, class_text: str = 'Only Me'):
+        self.click_if_body_hidden()
+
+        # Waiting if the create folder is already open or not
+        if self.is_element_available(locator='.overflow-auto.text-sm', timeout=5):
+            locator = '//button/span[text()="Cancel"]'
+            if self.is_element_available(locator=locator):
+                self.driver.find_element(by=By.XPATH, value=locator).click()
+                sleep(randint(a=1, b=3))
+
         print(f"Looking for text: '{class_text}'")
         class_text_locator = f'//div[contains(@class,"wrapper")]//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
-
-        # if self.is_element_available(locator=f'.wrapper p[title="{class_text}"]'):
         if self.is_element_available(locator=class_text_locator):
             required_element = self.driver.find_element(by=By.XPATH, value=class_text_locator)
             self.driver.execute_script("arguments[0].scrollIntoView(true);", required_element)
@@ -68,53 +78,57 @@ class DataNextUploader:
             sleep(randint(a=1, b=3))
             print(f"Clicked on '{class_text}' text")
         else:
-            self.driver.get(url='https://beaconhouse.datanext.co/folders')
+            self.create_new_folder(class_text=class_text)
+
+    def create_new_folder(self, class_text: str):
+        class_text_locator = f'//div[contains(@class,"wrapper")]//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
+        self.driver.get(url='https://beaconhouse.datanext.co/folders')
+        sleep(randint(a=1, b=3))
+
+        if self.is_element_available(locator='[title="Create new folders"]'):
+            self.driver.find_element(by=By.CSS_SELECTOR, value='[title="Create new folders"]').click()
             sleep(randint(a=1, b=3))
 
-            if self.is_element_available(locator='[title="Create new folders"]'):
-                self.driver.find_element(by=By.CSS_SELECTOR, value='[title="Create new folders"]').click()
-                sleep(randint(a=1, b=3))
+            locator = '.items-start .items-center svg'
+            if self.is_element_available(locator=locator):
+                for index, _ in enumerate(self.driver.find_elements(by=By.CSS_SELECTOR, value=locator)):
+                    self.driver.find_elements(by=By.CSS_SELECTOR, value=locator)[index].click()
+                    sleep(1)
 
-                locator = '.items-start .items-center svg'
+                locator = '[placeholder="Enter space name"]'
                 if self.is_element_available(locator=locator):
-                    for index, _ in enumerate(self.driver.find_elements(by=By.CSS_SELECTOR, value=locator)):
-                        self.driver.find_elements(by=By.CSS_SELECTOR, value=locator)[index].click()
-                        sleep(1)
+                    self.driver.find_element(by=By.CSS_SELECTOR, value=locator).clear()
+                    sleep(1)
+                    self.driver.find_element(by=By.CSS_SELECTOR, value=locator).send_keys(class_text)
+                    sleep(1)
 
-                    locator = '[placeholder="Enter space name"]'
+                    locator = '//button/span[text()="Create Folder"]'
                     if self.is_element_available(locator=locator):
-                        self.driver.find_element(by=By.CSS_SELECTOR, value=locator).clear()
-                        sleep(1)
-                        self.driver.find_element(by=By.CSS_SELECTOR, value=locator).send_keys(class_text)
-                        sleep(1)
+                        self.driver.find_element(by=By.XPATH, value=locator).click()
+                        sleep(randint(a=2, b=5))
 
-                        locator = '//button/span[text()="Create Folder"]'
-                        if self.is_element_available(locator=locator):
+                        # If Create Folder page didn't vanished
+                        locator = '//button/span[text()="Cancel"]'
+                        if self.is_element_available(locator=locator, timeout=5):
                             self.driver.find_element(by=By.XPATH, value=locator).click()
                             sleep(randint(a=2, b=5))
 
-                            # If Create Folder page didn't vanished
-                            locator = '//button/span[text()="Cancel"]'
-                            if self.is_element_available(locator=locator, timeout=5):
-                                self.driver.find_element(by=By.XPATH, value=locator).click()
-                                sleep(randint(a=2, b=5))
+                        self.navigate_to_site()
+                        if self.is_element_available(locator=class_text_locator):
+                            required_element = self.driver.find_element(by=By.XPATH, value=class_text_locator)
+                            self.driver.execute_script("arguments[0].scrollIntoView(true);", required_element)
+                            sleep(randint(a=1, b=3))
+                            self.driver.execute_script("arguments[0].click();", required_element)
+                            sleep(randint(a=1, b=3))
+                            print(f'Clicked on {class_text} text')
 
-                            self.navigate_to_site()
-                            if self.is_element_available(locator=class_text_locator):
-                                required_element = self.driver.find_element(by=By.XPATH, value=class_text_locator)
-                                self.driver.execute_script("arguments[0].scrollIntoView(true);", required_element)
-                                sleep(randint(a=1, b=3))
-                                self.driver.execute_script("arguments[0].click();", required_element)
-                                sleep(randint(a=1, b=3))
-                                print(f'Clicked on {class_text} text')
-                            sleep(1)
-
-                    else:
-                        print('Folder name field not found')
+                        sleep(randint(a=1, b=3))
                 else:
-                    print('User list not found')
+                    print('Folder name field not found')
             else:
-                print('Create new folders button not found')
+                print('User list not found')
+        else:
+            print('Create new folders button not found')
 
     def clear_upload_button(self):
         """Click the delete pending Upload button."""
@@ -281,6 +295,10 @@ class DataNextUploader:
         print("✅ Submit button clicked")
         sleep(5)
 
+        sleep(randint(a=1, b=3))
+        self.click_if_body_hidden()
+        sleep(randint(a=1, b=3))
+
     def close(self):
         """Close the browser."""
         if self.driver:
@@ -302,7 +320,7 @@ class DataNextUploader:
             self.start_driver()
             self.navigate_to_site()
             self.wait_for_login()
-            self.click_class_text(class_text)
+            self.click_class_text(class_text=class_text)
             self.click_upload_button()
             self.upload_files(file1_path, file2_path)
             try:

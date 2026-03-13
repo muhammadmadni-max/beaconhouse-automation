@@ -1,6 +1,8 @@
-import os, time
+import os
 from time import sleep
+from random import randint
 
+from pydevd_file_utils import report
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -97,16 +99,53 @@ class DataNextPDFUploader(DataNextUploader):
             self.start_driver()
             self.navigate_to_site()
             self.wait_for_login()
-            self.click_class_text(class_text)
+
+            self.click_class_text(class_text=class_text)
             self.click_upload_button()
-            self.upload_pdf(pdf_path)
+            self.upload_pdf(pdf_path=pdf_path)
 
             # Fill form once and submit
             sleep(2)
             self.fill_pdf_form(post_title, title, description)
             self.click_submit_button()
 
-            sleep(10)
+            # Creating a new folder with the name of addition of " report"
+            class_text_report = f'{class_text} report'
+            class_text_locator = f'//div[contains(@class,"wrapper")]//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text_report.lower()}"]'
+            if not self.is_element_available(locator=class_text_locator, timeout=15):
+                self.create_new_folder(class_text=class_text_report)
+
+            # opening the main class name again
+            sleep(randint(a=1, b=3))
+            self.click_class_text(class_text=class_text)
+
+            # Sharing the file
+            if self.is_element_available(locator='.justify-center.gap-2 [type="button"]'):
+                self.driver.find_element(by=By.CSS_SELECTOR, value='.justify-center.gap-2 [type="button"]').click()
+                sleep(randint(a=1, b=3))
+                if self.is_element_available(locator='#context-menu-parent'):
+                    self.driver.find_element(by=By.XPATH, value="//button[contains(text(), 'Share')]").click()
+                    sleep(randint(a=1, b=3))
+
+                # In-App Share
+                if self.is_element_available(locator='#portal [type="radio"]'):
+                    self.driver.find_element(by=By.CSS_SELECTOR, value='#portal [type="radio"]').click()
+                    sleep(randint(a=1, b=3))
+
+                    # Required folder
+                    locator = f'//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text_report.lower()}"]/ancestor::div[contains(@class,"hover:bg-slate-100")]'
+                    if self.is_element_available(locator=locator):
+                        main_element = self.driver.find_element(by=By.XPATH, value=locator)
+                        main_element.find_element(by=By.CSS_SELECTOR, value='svg.absolute').click()
+                        sleep(randint(a=1, b=3))
+
+                        # share button
+                        locator = '[type="button"].text-slate-500.rounded-full'
+                        if self.is_element_available(locator=locator):
+                            self.driver.find_element(by=By.CSS_SELECTOR, value=locator).click()
+                            sleep(randint(a=1, b=3))
+                            print('PDF is shared')
+
             print('PDF upload completed successfully!')
             sleep(3)
 
@@ -123,7 +162,7 @@ if __name__ == '__main__':
     pdf_file = os.path.join(script_dir, 'sample.pdf')
 
     uploader.run_pdf_workflow(
-        class_text='Only',
+        class_text='Only 1',
         pdf_path=pdf_file,
         post_title='Test PDF Document',
         title='Sample PDF',

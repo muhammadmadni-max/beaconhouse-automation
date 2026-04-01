@@ -109,8 +109,8 @@ def get_files_from_folder(folder_path):
 def process_media_upload(task_id: str, folder_path: str, class_text: str):
     """Background task for media upload"""
     try:
-        # base_path = Path("/home/datanext/PocBackend/media/recordings/")
-        base_path = Path(os.getcwd())
+        base_path = Path("/home/datanext/PocBackend/media/recordings/")
+        # base_path = Path(os.getcwd())
         folder_path_obj = Path(folder_path)
         last_folder_name = folder_path_obj.name
         final_path = base_path / last_folder_name
@@ -246,6 +246,16 @@ async def get_queue_status():
         "total_tasks": len(task_queue.task_status)
     }
 
+@app.post("/test")
+async def test(request: UploadRequest):
+    base_path = Path("/home/datanext/PocBackend/media/recordings/")
+    # base_path = Path(os.getcwd())
+    folder_path_obj = Path(request.folder_path)
+    last_folder_name = folder_path_obj.name
+    final_path = base_path / last_folder_name
+    return Path(os.getcwd())
+
+
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level='debug')

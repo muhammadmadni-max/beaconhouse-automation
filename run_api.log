@@ -1,0 +1,96 @@
+INFO:     Will watch for changes in these directories: ['/home/datanext/automation']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [1688] using StatReload
+INFO:     Started server process [1745]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     192.168.118.3:53932 - "POST /automation/ HTTP/1.1" 307 Temporary Redirect
+INFO:     192.168.118.3:53932 - "POST /automation HTTP/1.1" 200 OK
+📁 Processing media upload - Task ID: media_a4b670df
+📂 Final path: /home/datanext/PocBackend/media/recordings/Dr._Test_DSA_1774956228758
+❌ Media upload failed - Task ID: media_a4b670df, Error: Message: session not created: Chrome instance exited. Examine ChromeDriver verbose log to determine the cause.; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+#0 0x555899d519ca <unknown>
+#1 0x555899760ab5 <unknown>
+#2 0x55589979d66b <unknown>
+#3 0x555899798339 <unknown>
+#4 0x5558997e853e <unknown>
+#5 0x5558997e7c2c <unknown>
+#6 0x5558997a6cbf <unknown>
+#7 0x5558997a7a81 <unknown>
+#8 0x555899d179c4 <unknown>
+#9 0x555899d1a8b1 <unknown>
+#10 0x555899d0417e <unknown>
+#11 0x555899d1b47e <unknown>
+#12 0x555899ceab40 <unknown>
+#13 0x555899d3e918 <unknown>
+#14 0x555899d3eae8 <unknown>
+#15 0x555899d5043e <unknown>
+#16 0x7fb6ee780ac3 <unknown>
+
+❌ Task media_a4b670df failed: Message: session not created: Chrome instance exited. Examine ChromeDriver verbose log to determine the cause.; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+#0 0x555899d519ca <unknown>
+#1 0x555899760ab5 <unknown>
+#2 0x55589979d66b <unknown>
+#3 0x555899798339 <unknown>
+#4 0x5558997e853e <unknown>
+#5 0x5558997e7c2c <unknown>
+#6 0x5558997a6cbf <unknown>
+#7 0x5558997a7a81 <unknown>
+#8 0x555899d179c4 <unknown>
+#9 0x555899d1a8b1 <unknown>
+#10 0x555899d0417e <unknown>
+#11 0x555899d1b47e <unknown>
+#12 0x555899ceab40 <unknown>
+#13 0x555899d3e918 <unknown>
+#14 0x555899d3eae8 <unknown>
+#15 0x555899d5043e <unknown>
+#16 0x7fb6ee780ac3 <unknown>
+
+INFO:     127.0.0.1:33044 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33044 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44754 - "POST /automation HTTP/1.1" 200 OK
+📁 Processing media upload - Task ID: media_68ccb20a
+📂 Final path: /home/datanext/PocBackend/media/recordings/dsad_asdsadsa_1774950867002
+❌ Media upload failed - Task ID: media_68ccb20a, Error: Message: session not created: Chrome instance exited. Examine ChromeDriver verbose log to determine the cause.; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+#0 0x55a9b66f29ca <unknown>
+#1 0x55a9b6101ab5 <unknown>
+#2 0x55a9b613e66b <unknown>
+#3 0x55a9b6139339 <unknown>
+#4 0x55a9b618953e <unknown>
+#5 0x55a9b6188c2c <unknown>
+#6 0x55a9b6147cbf <unknown>
+#7 0x55a9b6148a81 <unknown>
+#8 0x55a9b66b89c4 <unknown>
+#9 0x55a9b66bb8b1 <unknown>
+#10 0x55a9b66a517e <unknown>
+#11 0x55a9b66bc47e <unknown>
+#12 0x55a9b668bb40 <unknown>
+#13 0x55a9b66df918 <unknown>
+#14 0x55a9b66dfae8 <unknown>
+#15 0x55a9b66f143e <unknown>
+#16 0x7f8c97824ac3 <unknown>
+
+❌ Task media_68ccb20a failed: Message: session not created: Chrome instance exited. Examine ChromeDriver verbose log to determine the cause.; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#sessionnotcreatedexception
+Stacktrace:
+#0 0x55a9b66f29ca <unknown>
+#1 0x55a9b6101ab5 <unknown>
+#2 0x55a9b613e66b <unknown>
+#3 0x55a9b6139339 <unknown>
+#4 0x55a9b618953e <unknown>
+#5 0x55a9b6188c2c <unknown>
+#6 0x55a9b6147cbf <unknown>
+#7 0x55a9b6148a81 <unknown>
+#8 0x55a9b66b89c4 <unknown>
+#9 0x55a9b66bb8b1 <unknown>
+#10 0x55a9b66a517e <unknown>
+#11 0x55a9b66bc47e <unknown>
+#12 0x55a9b668bb40 <unknown>
+#13 0x55a9b66df918 <unknown>
+#14 0x55a9b66dfae8 <unknown>
+#15 0x55a9b66f143e <unknown>
+#16 0x7f8c97824ac3 <unknown>
+
+/home/datanext/automation/run_api.sh: line 20:  1688 Killed                  uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug

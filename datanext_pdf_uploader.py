@@ -2,7 +2,7 @@ import os
 from time import sleep
 from random import randint
 
-from pydevd_file_utils import report
+# from pydevd_file_utils import report
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     pdf_file = os.path.join(script_dir, 'sample.pdf')
 
     uploader.run_pdf_workflow(
-        class_text='Only 1',
+        class_text='Only Random',
         pdf_path=pdf_file,
         post_title='Test PDF Document',
         title='Sample PDF',

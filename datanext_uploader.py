@@ -3,7 +3,7 @@ from time import sleep
 from random import randint
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
@@ -33,6 +33,12 @@ class DataNextUploader:
 
     def start_driver(self) -> None:
         options = Options()
+        # service = Service("/usr/bin/chromedriver") 
+        # options.add_argument("--headless=new")  # VERY IMPORTANT
+        # options.add_argument("--no-sandbox")
+        # options.add_argument("--disable-dev-shm-usage")
+        # options.add_argument("--disable-gpu")
+
         options.add_argument(f"--user-data-dir={self.chrome_profile_path}")
         self.driver = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.driver, self.wait_timeout)
@@ -349,8 +355,9 @@ if __name__ == '__main__':
 
     # Get script directory for file paths
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    file1 = os.path.join(script_dir, 'input', 'sample.mp3')
-    file2 = os.path.join(script_dir, 'input', 'sample.mp4')
+    # file1 = os.path.join(script_dir, 'input', 'sample.mp3')
+    file2 = os.path.join(script_dir, 'sample.mp4')
+    file1 = os.path.join(script_dir, 'sample.mp3')
 
     uploader.run_full_workflow(class_text='Only 1', file1_path=file1, file2_path=file2, post_title='Testing',
                                title='testing', description='raspotin lover of russian')

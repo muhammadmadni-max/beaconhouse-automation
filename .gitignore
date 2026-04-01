@@ -8,5 +8,9 @@ venv
 
 .idea
 chrome_profile
+chrome_profile1
+
 input
 *.pyc
+sample.*
+.run_api.sh.*

@@ -80,11 +80,24 @@ class DataNextUploader:
             required_element = self.driver.find_element(by=By.XPATH, value=class_text_locator)
             self.driver.execute_script("arguments[0].scrollIntoView(true);", required_element)
             sleep(randint(a=1, b=3))
-            self.driver.execute_script("arguments[0].click();", required_element)
+            # if folders are exceed the limit
+            try:
+                self.driver.execute_script("arguments[0].click();", required_element)
+            except:
+                view_all_selector = '.overflow-x-auto + div [type="button"]'
+                if self.is_element_available(locator=view_all_selector):
+                    self.driver.find_element(by=By.CSS_SELECTOR, value=view_all_selector).click()
+                    sleep(randint(a=1, b=3))
+                    class_text_locator_on_view_all = f'//div[contains(@class,"grid")]//p[@title and translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
+                    if self.is_element_available(locator=class_text_locator_on_view_all):
+                        self.driver.find_element(by=By.XPATH, value=class_text_locator_on_view_all).click()
+                        sleep(randint(a=1, b=3))
+
             sleep(randint(a=1, b=3))
             print(f"Clicked on '{class_text}' text")
         else:
             self.create_new_folder(class_text=class_text)
+
 
     def create_new_folder(self, class_text: str):
         class_text_locator = f'//div[contains(@class,"wrapper")]//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'

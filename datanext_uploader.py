@@ -1,10 +1,11 @@
 import os
 from time import sleep
 from random import randint
+
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
@@ -64,6 +65,29 @@ class DataNextUploader:
             actions = ActionChains(self.driver)
             actions.move_to_element(element).click().perform()
 
+    def scroll_page_down_action_chains(self, scroll_pause=1, max_scrolls=10, presses_per_scroll=5):
+        """Scroll using PAGE_DOWN key multiple times per iteration"""
+        last_height = self.driver.execute_script("return document.body.scrollHeight")
+
+        for scroll_count in range(max_scrolls):
+            # Press PAGE_DOWN multiple times
+            actions = ActionChains(self.driver)
+            for _ in range(presses_per_scroll):
+                actions.send_keys(Keys.PAGE_DOWN)
+            actions.perform()
+
+            sleep(scroll_pause)
+
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+
+            if new_height == last_height:
+                print(f"✅ Reached bottom after {scroll_count + 1} iterations")
+                break
+
+            last_height = new_height
+            print(f"📜 Iteration {scroll_count + 1} - Height: {new_height}")
+
+
     def click_class_text(self, class_text: str = 'Only Me'):
         self.click_if_body_hidden()
 
@@ -75,24 +99,30 @@ class DataNextUploader:
                 sleep(randint(a=1, b=3))
 
         print(f"Looking for text: '{class_text}'")
-        class_text_locator = f'//div[contains(@class,"wrapper")]//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
-        if self.is_element_available(locator=class_text_locator):
-            required_element = self.driver.find_element(by=By.XPATH, value=class_text_locator)
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", required_element)
-            sleep(randint(a=1, b=3))
-            # if folders are exceed the limit
-            try:
-                self.driver.execute_script("arguments[0].click();", required_element)
-            except:
-                view_all_selector = '.overflow-x-auto + div [type="button"]'
-                if self.is_element_available(locator=view_all_selector):
-                    self.driver.find_element(by=By.CSS_SELECTOR, value=view_all_selector).click()
-                    sleep(randint(a=1, b=3))
-                    class_text_locator_on_view_all = f'//div[contains(@class,"grid")]//p[@title and translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
-                    if self.is_element_available(locator=class_text_locator_on_view_all):
-                        self.driver.find_element(by=By.XPATH, value=class_text_locator_on_view_all).click()
-                        sleep(randint(a=1, b=3))
+        # class_text_locator = f'//div[contains(@class,"wrapper")]//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
+        # if self.is_element_available(locator=class_text_locator):
+        #     required_element = self.driver.find_element(by=By.XPATH, value=class_text_locator)
+        #     self.driver.execute_script("arguments[0].scrollIntoView(true);", required_element)
+        #     sleep(randint(a=1, b=3))
+        #     # if folders are exceed the limit
+        #     try:
+        #         self.driver.execute_script("arguments[0].click();", required_element)
+        #     except:
+        #         view_all_selector = '.overflow-x-auto + div [type="button"]'
+        #         if self.is_element_available(locator=view_all_selector):
+        #             self.driver.find_element(by=By.CSS_SELECTOR, value=view_all_selector).click()
+        #             sleep(randint(a=1, b=3))
+        #             class_text_locator_on_view_all = f'//div[contains(@class,"grid")]//p[@title and translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
+        #             if self.is_element_available(locator=class_text_locator_on_view_all):
+        #                 self.driver.find_element(by=By.XPATH, value=class_text_locator_on_view_all).click()
+        #                 sleep(randint(a=1, b=3))
 
+        self.driver.get(f'https://beaconhouse.datanext.co/folders?circles_query={class_text.lower()}')
+        sleep(randint(a=1, b=3))
+
+        class_text_locator_on_view_all = f'//div[contains(@class,"grid")]//p[@title and translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
+        if self.is_element_available(locator=class_text_locator_on_view_all):
+            self.driver.find_element(by=By.XPATH, value=class_text_locator_on_view_all).click()
             sleep(randint(a=1, b=3))
             print(f"Clicked on '{class_text}' text")
         else:
@@ -126,7 +156,7 @@ class DataNextUploader:
                         self.driver.find_element(by=By.XPATH, value=locator).click()
                         sleep(randint(a=2, b=5))
 
-                        # If Create Folder page didn't vanished
+                        # If Create Folder page didn't vanish
                         locator = '//button/span[text()="Cancel"]'
                         if self.is_element_available(locator=locator, timeout=5):
                             self.driver.find_element(by=By.XPATH, value=locator).click()

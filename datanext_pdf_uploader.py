@@ -162,7 +162,7 @@ if __name__ == '__main__':
     pdf_file = os.path.join(script_dir, 'sample.pdf')
 
     uploader.run_pdf_workflow(
-        class_text='Only Random',
+        class_text='DSA',
         pdf_path=pdf_file,
         post_title='Test PDF Document',
         title='Sample PDF',

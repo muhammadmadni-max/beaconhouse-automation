@@ -14,3 +14,4 @@ input
 *.pyc
 sample.*
 .run_api.sh.*
+test.py

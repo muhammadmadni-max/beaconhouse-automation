@@ -61,7 +61,8 @@ class DataNextUploader:
 
     def click_if_body_hidden(self):
         if self.is_element_available(locator='body[style="overflow: hidden;"]', timeout=5):
-            element = self.driver.find_element("css selector", "button")  # replace with your element
+            # element = self.driver.find_element("css selector", "button")  # replace with your element
+            element = self.driver.find_element(by=By.CSS_SELECTOR, value='.object-cover.cursor-pointer')  # replace with your element
             actions = ActionChains(self.driver)
             actions.move_to_element(element).click().perform()
 
@@ -86,7 +87,6 @@ class DataNextUploader:
 
             last_height = new_height
             print(f"📜 Iteration {scroll_count + 1} - Height: {new_height}")
-
 
     def click_class_text(self, class_text: str = 'Only Me'):
         self.click_if_body_hidden()
@@ -127,7 +127,6 @@ class DataNextUploader:
             print(f"Clicked on '{class_text}' text")
         else:
             self.create_new_folder(class_text=class_text)
-
 
     def create_new_folder(self, class_text: str):
         class_text_locator = f'//div[contains(@class,"wrapper")]//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text.lower()}"]'
@@ -192,6 +191,7 @@ class DataNextUploader:
         # Check and clear pending uploads if they exist
         pending_btns = self.driver.find_elements(By.XPATH, "//button[@title='show pending uploads']//p")
         if len(pending_btns) > 0:
+            self.driver.find_elements(By.XPATH, "//button[@title='show pending uploads']//p")[1].click()
             print('Found pending uploads, clearing them...')
             self.clear_upload_button()
 
@@ -402,5 +402,5 @@ if __name__ == '__main__':
     file2 = os.path.join(script_dir, 'sample.mp4')
     file1 = os.path.join(script_dir, 'sample.mp3')
 
-    uploader.run_full_workflow(class_text='Only 1', file1_path=file1, file2_path=file2, post_title='Testing',
-                               title='testing', description='raspotin lover of russian')
+    uploader.run_full_workflow(class_text='Only 1', file1_path=file1, file2_path=file2, post_title='Sample test',
+                               title='Sample test', description='Rasputin lover of russian')

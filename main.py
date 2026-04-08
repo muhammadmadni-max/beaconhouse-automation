@@ -71,8 +71,57 @@ class TaskQueue:
 task_queue = TaskQueue()
 
 
-# ==================== Media Upload Models & Functions ====================
+def parse_description(description: str) -> dict:
+    metadata = {
+        'description': '',
+        'speaker': '',
+        'name': '',
+        'date': '',
+        'start_time': '',
+        'end_time': '',
+        'duration': ''
+    }
+    if not description:
+        return metadata
+    try:
+        description = description.replace('\\n', '\n').replace('\\r', '')
+        parts = description.split('\n\n')
+        if len(parts) >= 2:
+            metadata['description'] = parts[0].strip()
+            metadata_parts = parts[1].split(' -- ')
+            if len(metadata_parts) >= 5:
+                metadata['speaker'] = metadata_parts[0].strip()
+                metadata['name'] = metadata_parts[1].strip()
+                metadata['date'] = metadata_parts[2].strip()
+                metadata['start_time'] = metadata_parts[3].strip()
+                metadata['end_time'] = metadata_parts[4].strip()
+                try:
+                    start = datetime.strptime(metadata['start_time'], '%H:%M:%S')
+                    end = datetime.strptime(metadata['end_time'], '%H:%M:%S')
+                    duration_seconds = (end.hour * 3600 + end.minute * 60 + end.second) - \
+                                       (start.hour * 3600 + start.minute * 60)
+                    if duration_seconds >= 3600:
+                        hours = duration_seconds // 3600
+                        minutes = (duration_seconds % 3600) // 60
+                        metadata['duration'] = f"{hours} hour{'s' if hours > 1 else ''}" + \
+                                               (f" {minutes} min" if minutes > 0 else "")
+                    elif duration_seconds >= 60:
+                        minutes = duration_seconds // 60
+                        seconds = duration_seconds % 60
+                        metadata['duration'] = f"{minutes} min" + \
+                                               (f" {seconds} sec" if seconds > 0 else "")
+                    else:
+                        metadata['duration'] = f"{duration_seconds} sec"
+                except:
+                    metadata['duration'] = "N/A"
+        else:
+            metadata['description'] = description.strip()
+    except Exception as e:
+        metadata['description'] = description
+    return metadata
 
+
+# ==================== Media Upload Models & Functions ====================
 class UploadRequest(BaseModel):
     folder_path: str
     class_text: str = "Only"
@@ -138,9 +187,13 @@ def process_pdf_upload(task_id: str, pdf_path: str, post_title: str, title: str,
     """Background task for PDF upload"""
     try:
         print(f"📄 Processing PDF upload - Task ID: {task_id}")
+        data = parse_description(description=description)
+        summary = f"{data['teacher_name']} -- {data['course_name']} -- {data['date']} -- {data['start_time']} -- {data['end_time']}"
 
         uploader = DataNextPDFUploader()
-        uploader.run_pdf_workflow(class_text=class_text, pdf_path=pdf_path, post_title=post_title, title=title,
+        # uploader.run_pdf_workflow(class_text=class_text, pdf_path=pdf_path, post_title=post_title, title=title,
+        #                           description=description)
+        uploader.run_pdf_workflow(class_text=class_text, pdf_path=pdf_path, post_title=summary, title=summary,
                                   description=description)
 
         print(f"✅ PDF upload completed - Task ID: {task_id}")
@@ -246,6 +299,7 @@ async def get_queue_status():
         "total_tasks": len(task_queue.task_status)
     }
 
+
 @app.post("/test")
 async def test(request: UploadRequest):
     base_path = Path("/home/datanext/PocBackend/media/recordings/")
@@ -254,7 +308,6 @@ async def test(request: UploadRequest):
     last_folder_name = folder_path_obj.name
     final_path = base_path / last_folder_name
     return Path(os.getcwd())
-
 
 
 if __name__ == "__main__":

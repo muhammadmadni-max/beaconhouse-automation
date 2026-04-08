@@ -3,8 +3,11 @@ from time import sleep
 from random import randint
 
 # from pydevd_file_utils import report
+from parsel import Selector
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
 from datanext_uploader import DataNextUploader
 
@@ -84,6 +87,45 @@ class DataNextPDFUploader(DataNextUploader):
         print(f'Description set to: {description}')
         sleep(3)
 
+    def get_link_after_sharing(self) -> str:
+        link = ''
+        # Sharing the file
+        if self.is_element_available(locator='.justify-center.gap-2 [type="button"]'):
+            self.driver.find_element(by=By.CSS_SELECTOR, value='.justify-center.gap-2 [type="button"]').click()
+            sleep(randint(a=1, b=3))
+            if self.is_element_available(locator='#context-menu-parent'):
+                self.driver.find_element(by=By.XPATH, value="//button[contains(text(), 'Share')]").click()
+                sleep(randint(a=1, b=3))
+
+            # In-App Share[0]
+            # Broad Share[1]
+            if self.is_element_available(locator='#portal [type="radio"]'):
+                self.driver.find_elements(by=By.CSS_SELECTOR, value='#portal [type="radio"]')[1].click()
+                sleep(randint(a=1, b=3))
+
+                # selecting 30 days from the drop-down
+                if self.is_element_available(locator='select.bg-gray-300'):
+                    dropdown = self.driver.find_element(by=By.CSS_SELECTOR, value="select.bg-gray-300")
+                    select = Select(dropdown)
+                    select.select_by_value("30")
+                    sleep(randint(a=1, b=3))
+
+                    # Generate Link
+                    if self.is_element_available(locator='button.px-2.py-1'):
+                        self.driver.find_element(by=By.CSS_SELECTOR, value="button.px-2.py-1").click()
+                        sleep(randint(a=1, b=3))
+
+                        if self.is_element_available(locator='#portal .break-all'):
+                            link = self.driver.find_element(by=By.CSS_SELECTOR, value="#portal .break-all").text
+                            sleep(randint(a=1, b=3))
+
+            # Pressing close button
+            if self.is_element_available(locator='#portal [fill="currentColor"]'):
+                self.driver.find_element(by=By.CSS_SELECTOR, value='#portal [fill="currentColor"]').click()
+                sleep(randint(a=1, b=3))
+
+        return link
+
     def run_pdf_workflow(self, class_text: str, pdf_path, post_title: str, title: str, description: str):
         """
         Run the complete PDF upload workflow.
@@ -109,6 +151,30 @@ class DataNextPDFUploader(DataNextUploader):
             self.fill_pdf_form(post_title, title, description)
             self.click_submit_button()
 
+            shared_link = self.get_link_after_sharing()
+
+            # got the link just need to paste that link in the related video
+            if self.is_element_available(locator='.mx-auto .font-poppins'):
+                for _ in range(3):
+                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'end', behavior: 'smooth'});",
+                                               self.driver.find_elements
+                                               (by=By.CSS_SELECTOR, value='.mx-auto .font-poppins')[-1])
+                    sleep(randint(a=3, b=5))
+
+                rows = self.driver.find_elements(by=By.CSS_SELECTOR, value='.mx-auto .font-poppins')
+                for row in rows[1:]:
+                    row_html = row.get_attribute('outerHTML')
+                    if post_title == Selector(text=row_html).css('p.break-all ::text').get(''):
+                        self.driver.execute_script("arguments[0].scrollIntoView({block: 'end', behavior: 'smooth'});", row)
+                        sleep(randint(a=1, b=2))
+                        comment_element = row.find_element(by=By.CSS_SELECTOR, value='[placeholder="Write a comment"]')
+                        comment_element.click()
+                        comment_element.clear()
+                        comment_element.send_keys(shared_link)
+                        sleep(randint(a=1, b=2))
+                        row.find_element(by=By.CSS_SELECTOR, value='[type="submit"]').click()
+                        print(f'Comment submitted successfully: {shared_link}')
+                        break
             # Creating a new folder with the name of addition of " report"
             # class_text_report = f'{class_text} report'
             # class_text_locator = f'//div[contains(@class,"wrapper")]//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text_report.lower()}"]'
@@ -119,19 +185,7 @@ class DataNextPDFUploader(DataNextUploader):
             # sleep(randint(a=1, b=3))
             # self.click_class_text(class_text=class_text)
             #
-            # # Sharing the file
-            # if self.is_element_available(locator='.justify-center.gap-2 [type="button"]'):
-            #     self.driver.find_element(by=By.CSS_SELECTOR, value='.justify-center.gap-2 [type="button"]').click()
-            #     sleep(randint(a=1, b=3))
-            #     if self.is_element_available(locator='#context-menu-parent'):
-            #         self.driver.find_element(by=By.XPATH, value="//button[contains(text(), 'Share')]").click()
-            #         sleep(randint(a=1, b=3))
-            #
-            #     # In-App Share
-            #     if self.is_element_available(locator='#portal [type="radio"]'):
-            #         self.driver.find_element(by=By.CSS_SELECTOR, value='#portal [type="radio"]').click()
-            #         sleep(randint(a=1, b=3))
-            #
+
             #         # Required folder
             #         locator = f'//p[translate(@title,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="{class_text_report.lower()}"]/ancestor::div[contains(@class,"hover:bg-slate-100")]'
             #         if self.is_element_available(locator=locator):
@@ -162,9 +216,9 @@ if __name__ == '__main__':
     pdf_file = os.path.join(script_dir, 'sample.pdf')
 
     uploader.run_pdf_workflow(
-        class_text='DSA',
+        class_text='Only 1',
         pdf_path=pdf_file,
-        post_title='Test PDF Document',
-        title='Sample PDF',
+        post_title='Sample test',
+        title='Sample test',
         description='This is a test PDF upload'
     )
